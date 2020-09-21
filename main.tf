@@ -1,27 +1,35 @@
+terraform {
+    required_version = ">= 0.12, < 0.13"
+}
+    
+
 provider "aws" {
     profile = "default"
     region  = "us-east-2"
+
+    # Allow any 2.x version of the AWS provider
+    version = "~> 2.0"
 }
 
-resource "aws_instance" "example" {
-    ami             = "ami-0c55b159cbfafe1f0"
-    instance_type   =   "t2.micro"
-    vpc_security_group_ids = [aws_security_group.instance.id]
+// resource "aws_instance" "example" {
+//     ami             = "ami-0c55b159cbfafe1f0"
+//     instance_type   =   "t2.micro"
+//     vpc_security_group_ids = [aws_security_group.instance.id]
 
-    user_data = <<-EOF
-                #!/bin/bash
-                echo "Hello, World of Inifinite Possibilites" > index.html
-                nohup busybox httpd -f -p ${var.server_port} &
-                EOF
+//     user_data = <<-EOF
+//                 #!/bin/bash
+//                 echo "Hello, World of Inifinite Possibilites" > index.html
+//                 nohup busybox httpd -f -p ${var.server_port} &
+//                 EOF
        
-    tags    = {
-        Name        = "terraform-example-instance",
-        QarikUser   = "channa"
-    }
-}
+//     tags    = {
+//         Name        = "terraform-example-instance",
+//         QarikUser   = "channa"
+//     }
+// }
 
 resource "aws_security_group" "instance" {
-    name = "terraform-example-instance"
+    name = var.instance_security_group_name
 
     ingress {
         from_port = var.server_port
@@ -172,19 +180,4 @@ resource "aws_lb_listener_rule" "asg" {
   }
 }
 
- variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type        = number
-  default     = 8080 
-}
-
-output "public_ip" {
-  value         = aws_instance.example.public_ip
-  description   = "The public IP address of the web server"
-}
-
-output "aln_dns_name" {
-  value       = aws_lb.example.dns_name
-  description = "The domain name of the load balancer"
-}
 
