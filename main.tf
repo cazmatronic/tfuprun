@@ -15,7 +15,7 @@ resource "aws_instance" "example" {
                 EOF
        
     tags    = {
-        Name        = "terraform-example",
+        Name        = "terraform-example-instance",
         QarikUser   = "channa"
     }
 }
@@ -31,7 +31,7 @@ resource "aws_security_group" "instance" {
     }
 
     tags    = {
-        Name      = "terraform-example-instance",
+        Name      = "terraform-example-instance-sg",
         QarikUser = "channa"
     }
 }
@@ -74,16 +74,21 @@ resource "aws_autoscaling_group" "example" {
   
   tag {
     key                  = "Name"
-    value                = "terraform-asg-example"
+    value                = "terraform-example-asg"
     propagate_at_launch  = true
     }  
 }
 
 resource "aws_lb" "example" {
-  name = "terraform-asg-example"
+  name = "terraform-example-asg"
   load_balancer_type = "application"
   subnets = data.aws_subnet_ids.default.ids
   security_groups     = [aws_security_group.alb.id]
+
+  tags = {
+      Name      = "terraform-example-lb",
+      QarikUser = "channa"
+  }
 }
 
 resource "aws_lb_listener" "http" {
@@ -121,6 +126,12 @@ resource "aws_security_group" "alb" {
     protocol      = "-1"
     cidr_blocks   = ["0.0.0.0/0"]
   }
+
+     tags    = {
+        Name      = "terraform-example-lb-sg",
+        QarikUser = "channa"
+    }
+
 }
 
 resource "aws_lb_target_group" "asg" {
@@ -137,6 +148,11 @@ resource "aws_lb_target_group" "asg" {
     timeout             = 3
     healthy_threshold   = 2    
     unhealthy_threshold = 2
+  }
+
+  tags = {
+      Name = "terraform-example-lb-tg"
+      QarikUser = "channa"
   }
 }
 
@@ -171,3 +187,4 @@ output "aln_dns_name" {
   value       = aws_lb.example.dns_name
   description = "The domain name of the load balancer"
 }
+
